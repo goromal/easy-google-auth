@@ -5,11 +5,13 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-def getGoogleService(api_name, version, secrets_file, refresh_token, scope):
+def getGoogleService(api_name, version, secrets_file, refresh_token, scope, headless=False):
     creds = None
     if os.path.exists(refresh_token):
         creds = Credentials.from_authorized_user_file(refresh_token, scope)
     if not creds or not creds.valid:
+        if headless:
+            return None
         if creds and creds.expired and creds.refresh_token:
             try:
                 creds.refresh(Request())
