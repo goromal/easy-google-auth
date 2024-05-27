@@ -26,7 +26,7 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless):
         raise CredentialsRefreshException("Cannot refresh credentials in headless mode.")
     if os.path.exists(refresh_token):
         with open(refresh_token, "r") as token_file:
-            token = json.loads(token_file.read())["token"]
+            token = json.loads(token_file.read())["refresh_token"]
         if not _revoke_token(token):
             raise CredentialsRefreshException("Unable to revoke token.")
         os.remove(refresh_token)
