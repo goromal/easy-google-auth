@@ -1,4 +1,6 @@
 import os
+import json
+import requests
 from google.auth.transport.requests import Request
 from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
@@ -8,10 +10,25 @@ from googleapiclient.discovery import build
 class CredentialsRefreshException(Exception):
     pass
 
+def _revoke_token(token):
+    response = requests.post(
+        'https://accounts.google.com/o/oauth2/revoke',
+        params={'token': token},
+        headers={'content-type': 'application/x-www-form-urlencoded'}
+    )
+    if response.status_code == 200:
+        return True
+    else:
+        return False
+
 def _refresh_creds(refresh_token, secrets_file, scope, headless):
     if headless:
         raise CredentialsRefreshException("Cannot refresh credentials in headless mode.")
     if os.path.exists(refresh_token):
+        with open(refresh_token, "r") as token_file:
+            token = json.loads(token_file.read())["token"]
+        if not _revoke_token(token):
+            raise CredentialsRefreshException("Unable to revoke token.")
         os.remove(refresh_token)
     flow = InstalledAppFlow.from_client_secrets_file(secrets_file, scope)
     return flow.run_local_server(port=0)
