@@ -23,7 +23,7 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless):
     flow = InstalledAppFlow.from_client_secrets_file(secrets_file, scope)
     return flow.run_local_server(port=0)
 
-def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False):
+def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     creds = None
     if force:
         creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
@@ -42,4 +42,7 @@ def getGoogleService(api_name, version, secrets_file, refresh_token, headless=Fa
                 creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
             with open(refresh_token, "w") as token:
                 token.write(creds.to_json())
-    return build(api_name, version, credentials=creds)
+    return creds
+
+def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False):
+    return build(api_name, version, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force))
