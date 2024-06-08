@@ -27,7 +27,7 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     creds = None
     if force:
         creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
-        with open(refresh_token, "w") as token:
+        with open(os.path.expanduser(refresh_token), "w") as token:
             token.write(creds.to_json())
     else:    
         if os.path.exists(refresh_token):
@@ -40,7 +40,7 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
                     creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
             else:
                 creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
-            with open(refresh_token, "w") as token:
+            with open(os.path.expanduser(refresh_token), "w") as token:
                 token.write(creds.to_json())
     return creds
 
