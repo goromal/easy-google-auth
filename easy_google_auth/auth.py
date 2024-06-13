@@ -20,14 +20,16 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless):
         raise CredentialsRefreshException("Cannot refresh credentials in headless mode.")
     if os.path.exists(refresh_token):
         os.remove(refresh_token)
-    flow = InstalledAppFlow.from_client_secrets_file(os.path.expanduser(secrets_file), scope)
+    flow = InstalledAppFlow.from_client_secrets_file(secrets_file, scope)
     return flow.run_local_server(port=0)
 
 def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
+    secrets_file = os.path.expanduser(secrets_file)
+    refresh_token = os.path.expanduser(refresh_token)
     creds = None
     if force:
         creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
-        with open(os.path.expanduser(refresh_token), "w") as token:
+        with open(refresh_token, "w") as token:
             token.write(creds.to_json())
     else:    
         if os.path.exists(refresh_token):
@@ -40,7 +42,7 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
                     creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
             else:
                 creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
-            with open(os.path.expanduser(refresh_token), "w") as token:
+            with open(refresh_token, "w") as token:
                 token.write(creds.to_json())
     return creds
 
