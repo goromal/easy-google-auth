@@ -15,13 +15,23 @@ _SCOPE = [
 class CredentialsRefreshException(Exception):
     pass
 
-def _refresh_creds(refresh_token, secrets_file, scope, headless):
-    if headless:
+def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refresh):
+    if headless and not headless_refresh:
         raise CredentialsRefreshException("Cannot refresh credentials in headless mode.")
     if os.path.exists(refresh_token):
         os.remove(refresh_token)
     flow = InstalledAppFlow.from_client_secrets_file(secrets_file, scope)
-    return flow.run_local_server(port=0)
+    if not headless_refresh:
+        return flow.run_local_server(port=0)
+    else:
+        auth_url, _ = flow.authorization_url(prompt='consent')
+        print(f"\n{auth_url}\n")
+        auth_res = input("Visit the URL above, complete the authorization, and paste here:")
+        flow.fetch_token(authorization_response=auth_res)
+        return flow.credentials
+        
+
+print('Please go to this URL and authorize:', auth_url)
 
 def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     secrets_file = os.path.expanduser(secrets_file)
