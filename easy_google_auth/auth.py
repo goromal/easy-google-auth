@@ -29,16 +29,13 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refres
         auth_res = input("Visit the URL above, complete the authorization, and paste here:")
         flow.fetch_token(authorization_response=auth_res)
         return flow.credentials
-        
 
-print('Please go to this URL and authorize:', auth_url)
-
-def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
+def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False, headless_refresh=False):
     secrets_file = os.path.expanduser(secrets_file)
     refresh_token = os.path.expanduser(refresh_token)
     creds = None
     if force:
-        creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
+        creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless_refresh)
         with open(refresh_token, "w") as token:
             token.write(creds.to_json())
     else:    
@@ -49,9 +46,9 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
                 try:
                     creds.refresh(Request())
                 except RefreshError:
-                    creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
+                    creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless_refresh)
             else:
-                creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless)
+                creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless_refresh)
             with open(refresh_token, "w") as token:
                 token.write(creds.to_json())
     return creds
