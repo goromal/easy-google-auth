@@ -53,5 +53,5 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False, hea
                 token.write(creds.to_json())
     return creds
 
-def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False):
-    return build(api_name, version, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force))
+def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False, headless_refresh=False):
+    return build(api_name, version, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force, headless_refresh))
