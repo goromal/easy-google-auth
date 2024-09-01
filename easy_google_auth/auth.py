@@ -48,4 +48,4 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     return creds
 
 def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False):
-    return build(api_name, version, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force))
+    return build(api_name, version, static_discovery=False, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force))
