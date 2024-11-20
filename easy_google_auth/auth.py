@@ -31,12 +31,12 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refres
         flow.fetch_token(authorization_response=auth_res)
         return flow.credentials
 
-def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False, headless_refresh=False):
+def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     secrets_file = os.path.expanduser(secrets_file)
     refresh_token = os.path.expanduser(refresh_token)
     creds = None
     if force:
-        creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless_refresh)
+        creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless and force)
         with open(refresh_token, "w") as token:
             token.write(creds.to_json())
     else:    
@@ -47,12 +47,12 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False, hea
                 try:
                     creds.refresh(Request())
                 except RefreshError:
-                    creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless_refresh)
+                    creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless and force)
             else:
-                creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless_refresh)
+                creds = _refresh_creds(refresh_token, secrets_file, _SCOPE, headless, headless and force)
             with open(refresh_token, "w") as token:
                 token.write(creds.to_json())
     return creds
 
-def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False, headless_refresh=False):
-    return build(api_name, version, static_discovery=False, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force, headless_refresh))
+def getGoogleService(api_name, version, secrets_file, refresh_token, headless=False, force=False):
+    return build(api_name, version, static_discovery=False, credentials=getGoogleCreds(secrets_file, refresh_token, headless, force))
