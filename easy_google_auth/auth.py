@@ -34,10 +34,10 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refres
         )
         auth_url, _ = flow.authorization_url(prompt="consent")
         print(f"\n{auth_url}\n")
-        auth_res = input(
+        auth_code = input(
             "Visit the URL above, complete the authorization, and paste here:"
         )
-        flow.fetch_token(authorization_response=auth_res.strip())
+        flow.fetch_token(code=auth_code.strip())
         return flow.credentials
 
 
