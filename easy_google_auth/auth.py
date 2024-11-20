@@ -37,7 +37,7 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refres
         auth_res = input(
             "Visit the URL above, complete the authorization, and paste here:"
         )
-        flow.fetch_token(authorization_response=auth_res)
+        flow.fetch_token(authorization_response=auth_res.strip())
         return flow.credentials
 
 
