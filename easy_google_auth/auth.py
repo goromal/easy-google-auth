@@ -1,4 +1,5 @@
 import os
+import time
 from google.auth.transport.requests import Request
 from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
@@ -75,6 +76,28 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     return creds
 
 
+class RateLimitedService:
+    def __init__(self, service, max_rate_per_sec):
+        self._service = service
+        self._max_rate = float(max_rate_per_sec)
+        self._min_interval = 1.0 / float(self._max_rate)
+        self._last_call_time = 0
+    
+    def __getattr__(self, name):
+        attr = getattr(self._service, name)
+        if callable(attr):
+            def wrapped_method(*args, **kwargs):
+                current_time = time.time()
+                elapsed_time = current_Time - self._last_call_time
+                if elapsed_time < self._min_interval:
+                    time_to_wait = self._min_interval - elapsed_time
+                    # Need to rate limit
+                    time.sleep(time_to_wait)
+                self._last_call_time = time.time()
+                return attr(*args, **kwargs)
+            return wrapped_method
+        return attr
+
 def getGoogleService(
     api_name, version, secrets_file, refresh_token, headless=False, force=False
 ):
@@ -84,3 +107,14 @@ def getGoogleService(
         static_discovery=False,
         credentials=getGoogleCreds(secrets_file, refresh_token, headless, force),
     )
+
+def getRateLimitedGoogleService(
+    api_name, version, secrets_file, refresh_token, headless=False, force=False, max_rate_per_sec=2.0
+):
+    service = build(
+        api_name,
+        version,
+        static_discovery=False,
+        credentials=getGoogleCreds(secrets_file, refresh_token, headless, force),
+    )
+    return RateLimitedService(service, max_rate_per_sec)
