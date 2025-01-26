@@ -88,7 +88,7 @@ class RateLimitedService:
         if callable(attr):
             def wrapped_method(*args, **kwargs):
                 current_time = time.time()
-                elapsed_time = current_Time - self._last_call_time
+                elapsed_time = current_time - self._last_call_time
                 if elapsed_time < self._min_interval:
                     time_to_wait = self._min_interval - elapsed_time
                     # Need to rate limit
