@@ -50,7 +50,7 @@ class HeadlessCredentialsGenerator:
         self.flow = InstalledAppFlow.from_client_secrets_file(
             self.secrets_file, self.scope, redirect_uri="urn:ietf:wg:oauth:2.0:oob"
         )
-        self.auth_url, _ = flow.authorization_url(prompt="consent")
+        self.auth_url, _ = self.flow.authorization_url(prompt="consent")
 
     def getAuthUrl(self):
         return self.auth_url
