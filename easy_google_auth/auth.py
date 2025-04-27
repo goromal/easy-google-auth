@@ -42,6 +42,25 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refres
         return flow.credentials
 
 
+class HeadlessCredentialsGenerator:
+    def __init__(self, secrets_file, refresh_token):
+        self.secrets_file = os.path.expanduser(secrets_file)
+        self.refresh_token = os.path.expanduser(refresh_token)
+        self.scope = _SCOPE
+        self.flow = InstalledAppFlow.from_client_secrets_file(
+            self.secrets_file, self.scope, redirect_uri="urn:ietf:wg:oauth:2.0:oob"
+        )
+        self.auth_url, _ = self.flow.authorization_url(prompt="consent")
+
+    def getAuthUrl(self):
+        return self.auth_url
+    
+    def authorize(self, auth_code):
+        self.flow.fetch_token(code=auth_code.strip())
+        with open(self.refresh_token, "w") as token:
+            token.write(self.flow.credentials.to_json())
+
+
 def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
     secrets_file = os.path.expanduser(secrets_file)
     refresh_token = os.path.expanduser(refresh_token)
