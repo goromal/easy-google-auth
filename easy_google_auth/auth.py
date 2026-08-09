@@ -11,6 +11,7 @@ _SCOPE = [
     "https://www.googleapis.com/auth/documents",
     "https://www.googleapis.com/auth/tasks",
     "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/photoslibrary",
 ]
 
