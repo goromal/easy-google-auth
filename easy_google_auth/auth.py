@@ -8,6 +8,7 @@ from googleapiclient.discovery import build
 
 _SCOPE = [
     "https://mail.google.com/",
+    "https://www.googleapis.com/auth/gmail.settings.basic",
     "https://www.googleapis.com/auth/documents",
     "https://www.googleapis.com/auth/tasks",
     "https://www.googleapis.com/auth/spreadsheets",
