@@ -45,10 +45,10 @@ def _refresh_creds(refresh_token, secrets_file, scope, headless, headless_refres
 
 
 class HeadlessCredentialsGenerator:
-    def __init__(self, secrets_file, refresh_token):
+    def __init__(self, secrets_file, refresh_token, scope=None):
         self.secrets_file = os.path.expanduser(secrets_file)
         self.refresh_token = os.path.expanduser(refresh_token)
-        self.scope = _SCOPE
+        self.scope = scope if scope is not None else _SCOPE
         self.flow = InstalledAppFlow.from_client_secrets_file(
             self.secrets_file, self.scope, redirect_uri="urn:ietf:wg:oauth:2.0:oob"
         )
@@ -63,19 +63,21 @@ class HeadlessCredentialsGenerator:
             token.write(self.flow.credentials.to_json())
 
 
-def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
+def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False, scope=None):
+    if scope is None:
+        scope = _SCOPE
     secrets_file = os.path.expanduser(secrets_file)
     refresh_token = os.path.expanduser(refresh_token)
     creds = None
     if force:
         creds = _refresh_creds(
-            refresh_token, secrets_file, _SCOPE, headless, headless and force
+            refresh_token, secrets_file, scope, headless, headless and force
         )
         with open(refresh_token, "w") as token:
             token.write(creds.to_json())
     else:
         if os.path.exists(refresh_token):
-            creds = Credentials.from_authorized_user_file(refresh_token, _SCOPE)
+            creds = Credentials.from_authorized_user_file(refresh_token, scope)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 try:
@@ -84,13 +86,13 @@ def getGoogleCreds(secrets_file, refresh_token, headless=False, force=False):
                     creds = _refresh_creds(
                         refresh_token,
                         secrets_file,
-                        _SCOPE,
+                        scope,
                         headless,
                         headless and force,
                     )
             else:
                 creds = _refresh_creds(
-                    refresh_token, secrets_file, _SCOPE, headless, headless and force
+                    refresh_token, secrets_file, scope, headless, headless and force
                 )
             with open(refresh_token, "w") as token:
                 token.write(creds.to_json())
@@ -120,22 +122,22 @@ class RateLimitedService:
         return attr
 
 def getGoogleService(
-    api_name, version, secrets_file, refresh_token, headless=False, force=False
+    api_name, version, secrets_file, refresh_token, headless=False, force=False, scope=None
 ):
     return build(
         api_name,
         version,
         static_discovery=False,
-        credentials=getGoogleCreds(secrets_file, refresh_token, headless, force),
+        credentials=getGoogleCreds(secrets_file, refresh_token, headless, force, scope),
     )
 
 def getRateLimitedGoogleService(
-    api_name, version, secrets_file, refresh_token, headless=False, force=False, max_rate_per_sec=2.0
+    api_name, version, secrets_file, refresh_token, headless=False, force=False, max_rate_per_sec=2.0, scope=None
 ):
     service = build(
         api_name,
         version,
         static_discovery=False,
-        credentials=getGoogleCreds(secrets_file, refresh_token, headless, force),
+        credentials=getGoogleCreds(secrets_file, refresh_token, headless, force, scope),
     )
     return RateLimitedService(service, max_rate_per_sec)
